@@ -21,4 +21,16 @@ library LibDiamond {
         // All the available facets' addresses
         EnumerableSet.AddressSet facets;
     }
+
+    /// @dev Retrieve the diamond storage
+    function diamondStorage()
+        internal
+        pure
+        returns (DiamondStorage storage ds)
+    {
+        bytes32 position = DIAMOND_STORAGE_POSITION;
+        assembly {
+            ds.slot := position
+        }
+    }
 }
