@@ -10,6 +10,7 @@ repos:
       - id: check-yaml
       - id: check-json
       - id: pretty-format-json
+        args: [--autofix]
       - id: check-added-large-files
         args: ["--maxkb=50000"]
       - id: no-commit-to-branch
