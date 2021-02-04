@@ -60,4 +60,47 @@ library LibDiamond {
             );
         }
     }
+
+    /// @dev Add a collection of functions to diamond
+    function addFunctions(
+        address _facetAddress,
+        bytes4[] memory _functionSelectors
+    ) internal {
+        // need functions to add
+        require(_functionSelectors.length > 0); // dev: No selectors in facet to cut
+        // get the storage
+        DiamondStorage storage ds = diamondStorage();
+        // facet address can't be zero address
+        require(_facetAddress != address(0)); // dev: Add facet can't be address(0)
+        // verify the contract has code to execute
+        enforceHasContractCode(_facetAddress);
+        // loop through each selector
+        for (
+            uint256 selectorIndex;
+            selectorIndex < _functionSelectors.length;
+            selectorIndex++
+        ) {
+            // get the current iterations function selector
+            bytes4 selector = _functionSelectors[selectorIndex];
+            // check what the selectors facet address is
+            address oldFacetAddress = ds.selectorToFacetAddress[selector];
+            // verify there is no previous facet contract
+            require(oldFacetAddress == address(0)); // dev: Can't add function that already exists
+            // add the facet address and selector position in selector array for the selector
+            ds.selectorToFacetAddress[selector] = _facetAddress;
+            bool addSelector =
+                ds.facetAddressToFunctionSelectors[_facetAddress].add(selector);
+            require(addSelector); // dev: selector already present in facet
+            ds.facets.add(_facetAddress);
+        }
+    }
+
+    /// @dev Verify a contract has code
+    function enforceHasContractCode(address _contract) internal view {
+        uint256 contractSize;
+        assembly {
+            contractSize := extcodesize(_contract)
+        }
+        require(contractSize > 0); // dev: Add facet has no code
+    }
 }
