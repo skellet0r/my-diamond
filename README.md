@@ -1,14 +1,8 @@
-# Python Dev Dapp Template
+# Recovery
 
 A template for building dapps with `eth-brownie` and `reactjs`.
 
 ## Getting Started
-
-There are a couple of things you'll need to edit once you've created your repository using this template:
-
-- [ ] Change environment name in `environment.yml`
-- [ ] Change project name in `package.json`
-- [ ] Change header in this `README.md`
 
 To initialize your environment you'll need to have the following dependencies pre-installed:
 

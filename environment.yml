@@ -1,4 +1,4 @@
-name: [Project Name]
+name: recovery
 channels:
   - defaults
   - conda-forge
@@ -9,4 +9,4 @@ dependencies:
   - pre-commit==2.10.0
   - pip
   - pip:
-    - eth-brownie==1.13.1
+      - eth-brownie==1.13.1
