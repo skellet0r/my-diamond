@@ -34,6 +34,7 @@ library LibDiamond {
         }
     }
 
+    /// @dev convert a bytes32 value to a bytes4
     function bytes32ToBytes4(bytes32 _value)
         internal
         pure
@@ -42,11 +43,10 @@ library LibDiamond {
         value_ = bytes4(_value);
     }
 
-    function selectorsBytes32ToBytes4Array(EnumerableSet.Bytes32Set _selectors)
-        internal
-        pure
-        returns (bytes4[] selectors_)
-    {
+    /// @dev Useful for converting the enumerableset.bytes32 to bytes4 array
+    function selectorsBytes32ToBytes4Array(
+        EnumerableSet.Bytes32Set storage _selectors
+    ) internal view returns (bytes4[] memory selectors_) {
         // initialize return array to be the same size as our array of selectors
         selectors_ = new bytes4[](_selectors.length());
         // for loop which assigns each selector into the return array
