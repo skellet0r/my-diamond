@@ -41,4 +41,23 @@ library LibDiamond {
     {
         value_ = bytes4(_value);
     }
+
+    function selectorsBytes32ToBytes4Array(EnumerableSet.Bytes32Set _selectors)
+        internal
+        pure
+        returns (bytes4[] selectors_)
+    {
+        // initialize return array to be the same size as our array of selectors
+        selectors_ = new bytes4[](_selectors.length());
+        // for loop which assigns each selector into the return array
+        for (
+            uint256 selectorIndex;
+            selectorIndex < _selectors.length();
+            selectorIndex++
+        ) {
+            selectors_[selectorIndex] = bytes32ToBytes4(
+                _selectors[selectorIndex]
+            );
+        }
+    }
 }
