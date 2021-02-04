@@ -65,4 +65,15 @@ contract DiamondLoupe is IDiamondLoupe {
             facetAddresses_[facetIndex] = _facets.at(facetIndex);
         }
     }
+
+    function facetAddress(bytes4 _functionSelector)
+        external
+        view
+        override
+        returns (address facetAddress_)
+    {
+        // load the diamond storage
+        LibDiamond.DiamondStorage ds = LibDiamond.diamondStorage();
+        facetAddress_ = selectorToFacetAddress[_functionSelector];
+    }
 }
