@@ -1,0 +1,12 @@
+name: [Project Name]
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python==3.9.1
+  - black==19.10b0
+  - flake8==3.8.4
+  - pre-commit==2.10.0
+  - pip
+  - pip:
+    - eth-brownie==1.13.1
