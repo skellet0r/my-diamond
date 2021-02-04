@@ -106,23 +106,112 @@ class TestDiamondCutImplementation:
     it will be interacted with through the Diamond contract.
     """
 
-    def test_diamond_cut_emits_DiamondCut_event(adam, diamond):
-        pass
+    def test_diamond_cut_emits_DiamondCut_event(
+        adam, diamond, MockContract: ContractContainer
+    ):
+        mock = adam.deploy(MockContract)
+        tx = diamond.diamondCut(
+            [[mock.address, 0, list(MockContract.signatures.values())]],
+            to_address("0x0000000000000000000000000000000000000000"),
+            to_bytes(0),
+        )
 
-    def test_retrieve_all_facets_is_updated_with_new_facets(adam, diamond):
-        pass
+        assert "DiamondCut" in tx.events
 
-    def test_retrieve_all_facets_is_updated_with_new_selectors(adam, diamond):
-        pass
+    def test_retrieve_all_facets_is_updated_with_new_facets(
+        adam, diamond, MockContract: ContractContainer
+    ):
+        before = diamond.facetAddresses()
 
-    def test_diamond_delegates_call_with_calldata_to_init(adam, diamond):
-        pass
+        mock = adam.deploy(MockContract)
+        diamond.diamondCut(
+            [[mock.address, 0, list(MockContract.signatures.values())]],
+            to_address("0x0000000000000000000000000000000000000000"),
+            to_bytes(0),
+        )
 
-    def test_no_delegatecall_when_init_is_zero_address_and_no_calldata(adam, diamond):
-        pass
+        after = diamond.facetAddresses()
 
-    def test_diamond_cut_fails_when_given_calldata_but_no_init(adam, diamond):
-        pass
+        assert mock.address not in before
+        assert mock.address in after
 
-    def test_diamond_cut_fails_when_given_init_but_no_calldata(adam, diamond):
-        pass
+    def test_retrieve_all_facets_is_updated_with_new_selectors(
+        adam, diamond, MockContract: ContractContainer
+    ):
+        before = diamond.facets()
+
+        mock = adam.deploy(MockContract)
+        diamond.diamondCut(
+            [[mock.address, 0, list(MockContract.signatures.values())]],
+            to_address("0x0000000000000000000000000000000000000000"),
+            to_bytes(0),
+        )
+
+        after = diamond.facets()
+        after_selectors = [selector for facet in after for selector in facet[1]]
+
+        assert before != after
+        assert MockContract.signatures["main"] in after_selectors
+
+    def test_diamond_delegates_call_with_calldata_to_init(
+        adam, diamond, MockContract: ContractContainer
+    ):
+
+        mock = adam.deploy(MockContract)
+
+        before = mock.getVal()  # this will be 0
+
+        diamond.diamondCut(
+            [[mock.address, 0, list(MockContract.signatures.values())]],
+            mock.address,
+            MockContract.signatures["main"],
+        )
+
+        after = mock.getVal()  # this should be 100
+
+        assert before == 0
+        assert after == 100
+
+    def test_no_delegatecall_when_init_is_zero_address_and_no_calldata(
+        adam, diamond, MockContract: ContractContainer
+    ):
+
+        mock = adam.deploy(MockContract)
+
+        before = mock.getVal()  # this will be 0
+
+        diamond.diamondCut(
+            [[mock.address, 0, list(MockContract.signatures.values())]],
+            to_address("0x0000000000000000000000000000000000000000"),
+            to_bytes(0),
+        )
+
+        after = mock.getVal()  # this should still be 0
+
+        assert before == after
+
+    def test_diamond_cut_fails_when_given_calldata_but_no_init(
+        adam, diamond, MockContract: ContractContainer
+    ):
+
+        mock = adam.deploy(MockContract)
+
+        with brownie.reverts("dev: _init is address(0) but_calldata is not empty"):
+            diamond.diamondCut(
+                [[mock.address, 0, list(MockContract.signatures.values())]],
+                to_address("0x0000000000000000000000000000000000000000"),
+                MockContract.signatures["main"],
+            )
+
+    def test_diamond_cut_fails_when_given_init_but_no_calldata(
+        adam, diamond, MockContract: ContractContainer
+    ):
+
+        mock = adam.deploy(MockContract)
+
+        with brownie.reverts("dev: _calldata is empty but _init is not address(0)"):
+            diamond.diamondCut(
+                [[mock.address, 0, list(MockContract.signatures.values())]],
+                mock.address,
+                to_bytes(0),
+            )
