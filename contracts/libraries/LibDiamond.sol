@@ -13,7 +13,7 @@ library LibDiamond {
     bytes32 constant DIAMOND_STORAGE_POSITION =
         keccak256("diamond.standard.diamond.storage");
 
-    struct DiamondStorage {
+    struct LibDiamond {
         // Useful for getting all the function selectors at an address
         mapping(address => EnumerableSet.Bytes32Set) facetAddressToFunctionSelectors;
         // Query the address for which function selector is available
