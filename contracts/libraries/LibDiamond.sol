@@ -33,4 +33,12 @@ library LibDiamond {
             ds.slot := position
         }
     }
+
+    function bytes32ToBytes4(bytes32 _value)
+        internal
+        pure
+        returns (bytes4 value_)
+    {
+        value_ = bytes4(_value);
+    }
 }
