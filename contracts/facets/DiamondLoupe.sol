@@ -47,4 +47,22 @@ contract DiamondLoupe is IDiamondLoupe {
             selectors
         );
     }
+
+    function facetAddresses()
+        external
+        view
+        override
+        returns (address[] memory facetAddresses_)
+    {
+        // load the diamond storage
+        LibDiamond.DiamondStorage ds = LibDiamond.diamondStorage();
+        // the enumerable set of facets
+        _facets = ds.facets;
+        // initialize size of the return array
+        facetAddresses_ = new address[](ds.facets.length());
+        for (uint256 facetIndex; facetIndex < _facets.length(); facetIndex++) {
+            // assign the facet to the index
+            facetAddresses_[facetIndex] = _facets.at(facetIndex);
+        }
+    }
 }
