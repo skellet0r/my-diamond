@@ -56,7 +56,7 @@ library LibDiamond {
             selectorIndex++
         ) {
             selectors_[selectorIndex] = bytes32ToBytes4(
-                _selectors[selectorIndex]
+                _selectors.at(selectorIndex)
             );
         }
     }
