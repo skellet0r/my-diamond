@@ -6,6 +6,29 @@ import {IDiamondLoupe} from "../../interfaces/ERC2535/IDiamondLoupe.sol";
 import {LibDiamond} from "../libraries/LibDiamond.sol";
 
 contract DiamondLoupe is IDiamondLoupe {
+    function facets()
+        external
+        view
+        override
+        returns (IDiamondLoupe.Facet[] memory facets_)
+    {
+        // load the diamond storage
+        LibDiamond.DiamondStorage ds = LibDiamond.diamondStorage();
+        // get the diamond facets
+        _facets = ds.facets;
+        // initialize size of the return
+        facets_ = new IDiamondLoupe.Facet[](_facets.length());
+        for (uint256 facetIndex; facetIndex < _facets.length(); facetIndex++) {
+            // assign the facet to the index
+            facets_[facetIndex] = IDiamondLoupe.Facet({
+                facetAddress: _facets.at(facetIndex),
+                functionSelectors: LibDiamond.selectorsBytes32ToBytes4Array(
+                    ds.facetAddressToFunctionSelectors[_facets.at(facetIndex)]
+                )
+            });
+        }
+    }
+
     function facetFunctionSelectors(address _facet)
         external
         view
@@ -19,17 +42,9 @@ contract DiamondLoupe is IDiamondLoupe {
 
         // get the known function selectors for facet_
         selectors = ds.facetAddressToFunctionSelectors[facet_];
-        // initialize return array to be the same size as our array of selectors
-        facetFunctionSelectors_ = new bytes4[](selectors.length());
-        // for loop which assigns each selector into the return array
-        for (
-            uint256 selectorIndex;
-            selectorIndex < selectors.length();
-            selectorIndex++
-        ) {
-            facetFunctionSelectors_[selectorIndex] = ds.bytes32ToBytes4(
-                selectors[selectorIndex]
-            );
-        }
+        // use library function to quickly make the return array
+        facetFunctionSelectors_ = LibDiamond.selectorsBytes32ToBytes4Array(
+            selectors
+        );
     }
 }
