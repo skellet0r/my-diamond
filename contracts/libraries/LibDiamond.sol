@@ -21,6 +21,8 @@ library LibDiamond {
         mapping(bytes4 => address) selectorToFacetAddress;
         // All the available facets' addresses
         EnumerableSet.AddressSet facets;
+        // ERC165 supported interfaces
+        mapping(bytes4 => bool) supportedInterfaces;
     }
 
     event DiamondCut(
@@ -268,5 +270,30 @@ library LibDiamond {
             contractSize := extcodesize(_contract)
         }
         require(contractSize > 0); // dev: Add facet has no code
+    }
+
+    /**
+     * @dev Registers the contract as an implementer of the interface defined by
+     * `interfaceId`. Support of the actual ERC165 interface is automatic and
+     * registering its interface id is not required.
+     *
+     * See {IERC165-supportsInterface}.
+     *
+     * Requirements:
+     *
+     * - `interfaceId` cannot be the ERC165 invalid interface (`0xffffffff`).
+     */
+    function registerInterface(bytes4 interfaceId) internal {
+        require(interfaceId != 0xffffffff, "ERC165: invalid interface id");
+        // get the storage
+        DiamondStorage storage ds = diamondStorage();
+        ds.supportedInterfaces[interfaceId] = true;
+    }
+
+    function unregisterInterface(bytes4 interfaceId) internal {
+        require(interfaceId != 0xffffffff, "ERC165: invalid interface id");
+        // get the storage
+        DiamondStorage storage ds = diamondStorage();
+        ds.supportedInterfaces[interfaceId] = false;
     }
 }
