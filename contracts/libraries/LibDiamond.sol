@@ -239,10 +239,16 @@ library LibDiamond {
         internal
     {
         if (_init == address(0)) {
-            require(_calldata.length == 0); // dev: _init is address(0) but_calldata is not empty
+            require(
+                _calldata.length == 0,
+                "_init is address(0) but_calldata is not empty"
+            ); // dev: _init is address(0) but_calldata is not empty
         } else {
             // if we are calling an address then our calldata > 0
-            require(_calldata.length > 0); // dev: _calldata is empty but _init is not address(0)
+            require(
+                _calldata.length > 0,
+                "_calldata is empty but _init is not address(0)"
+            ); // dev: _calldata is empty but _init is not address(0)
             // if the address we are calling is not this contract verify it has code
             if (_init != address(this)) {
                 enforceHasContractCode(_init); // dev: _init address has no code
