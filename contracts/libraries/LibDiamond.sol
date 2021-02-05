@@ -219,6 +219,35 @@ library LibDiamond {
         }
     }
 
+    /// @dev Initialize the diamond cut
+    function initializeDiamondCut(address _init, bytes memory _calldata)
+        internal
+    {
+        if (_init == address(0)) {
+            require(_calldata.length == 0); // dev: _init is address(0) but_calldata is not empty
+        } else {
+            // if we are calling an address then our calldata > 0
+            require(_calldata.length > 0); // dev: _calldata is empty but _init is not address(0)
+            // if the address we are calling is not this contract verify it has code
+            if (_init != address(this)) {
+                enforceHasContractCode(_init); // dev: _init address has no code
+            }
+            // issue a delegate call to the contract
+            (bool success, bytes memory error) = _init.delegatecall(_calldata);
+            // if it isn't successful
+            if (!success) {
+                if (error.length > 0) {
+                    // bubble up the error if one is given
+                    revert(string(error));
+                } else {
+                    // if no revert message give our own
+                    revert("LibDiamondCut: _init function reverted");
+                }
+            }
+            // if the delegatecall is successful then finish
+        }
+    }
+
     /// @dev Verify a contract has code
     function enforceHasContractCode(address _contract) internal view {
         uint256 contractSize;
