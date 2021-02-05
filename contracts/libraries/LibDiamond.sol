@@ -88,9 +88,17 @@ library LibDiamond {
                     _diamondCut[facetIndex].functionSelectors
                 );
             } else if (action == IDiamondCut.FacetCutAction.Replace) {
-                // do something
+                // Replace some functions
+                LibDiamond.replaceFunctions(
+                    _diamondCut[facetIndex].facetAddress,
+                    _diamondCut[facetIndex].functionSelectors
+                );
             } else if (action == IDiamondCut.FacetCutAction.Remove) {
-                // do something
+                // Remove some functions
+                LibDiamond.removeFunctions(
+                    _diamondCut[facetIndex].facetAddress,
+                    _diamondCut[facetIndex].functionSelectors
+                );
             } else {
                 // revert because the wrong action was given
                 revert(); // dev: Incorrect FacetCutAction
