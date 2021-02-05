@@ -7,8 +7,8 @@ contract MockContract {
         setVal(0);
     }
 
-    function main() external returns (uint256 val_) {
-        setVal(100);
+    function main(uint256 _val) external {
+        setVal(_val);
     }
 
     function getVal() external view returns (uint256 val_) {
