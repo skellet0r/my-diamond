@@ -106,6 +106,7 @@ library LibDiamond {
         }
         emit DiamondCut(_diamondCut, _init, _calldata);
         // initialize the diamond
+        initializeDiamondCut(_init, _calldata);
     }
 
     /// @dev Add a collection of functions to diamond
