@@ -80,5 +80,6 @@ contract DiamondLoupe is IDiamondLoupe {
         // load the diamond storage
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         facetAddress_ = ds.selectorToFacetAddress[_functionSelector];
+        require(facetAddress_ != address(0));
     }
 }
