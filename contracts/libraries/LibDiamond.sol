@@ -3,6 +3,7 @@ pragma solidity ^0.7.4;
 pragma abicoder v2;
 
 import {EnumerableSet} from "openzeppelin/contracts/utils/EnumerableSet.sol";
+import {IDiamondCut} from "../../interfaces/ERC2535/IDiamondCut.sol";
 
 /// @title Storage library related to the Diamond Standard implementation
 /// @author Edward Amor
@@ -21,6 +22,12 @@ library LibDiamond {
         // All the available facets' addresses
         EnumerableSet.AddressSet facets;
     }
+
+    event DiamondCut(
+        IDiamondCut.FacetCut[] _diamondCut,
+        address _init,
+        bytes _calldata
+    );
 
     /// @dev Retrieve the diamond storage
     function diamondStorage()
@@ -59,6 +66,38 @@ library LibDiamond {
                 _selectors.at(selectorIndex)
             );
         }
+    }
+
+    function diamondCut(
+        IDiamondCut.FacetCut[] memory _diamondCut,
+        address _init,
+        bytes memory _calldata
+    ) internal {
+        // loop through all the cuts
+        for (
+            uint256 facetIndex;
+            facetIndex < _diamondCut.length;
+            facetIndex++
+        ) {
+            // what action is being performed
+            IDiamondCut.FacetCutAction action = _diamondCut[facetIndex].action;
+            if (action == IDiamondCut.FacetCutAction.Add) {
+                // add the functions
+                LibDiamond.addFunctions(
+                    _diamondCut[facetIndex].facetAddress,
+                    _diamondCut[facetIndex].functionSelectors
+                );
+            } else if (action == IDiamondCut.FacetCutAction.Replace) {
+                // do something
+            } else if (action == IDiamondCut.FacetCutAction.Remove) {
+                // do something
+            } else {
+                // revert because the wrong action was given
+                revert(); // dev: Incorrect FacetCutAction
+            }
+        }
+        emit DiamondCut(_diamondCut, _init, _calldata);
+        // initialize the diamond
     }
 
     /// @dev Add a collection of functions to diamond
