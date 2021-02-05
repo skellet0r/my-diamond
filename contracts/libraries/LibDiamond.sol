@@ -134,6 +134,44 @@ library LibDiamond {
         }
     }
 
+    /// @dev Remove a collection of functions from diamond
+    function removeFunctions(
+        address _facetAddress,
+        bytes4[] memory _functionSelectors
+    ) internal {
+        // need functions to add
+        require(_functionSelectors.length > 0); // dev: No selectors in facet to cut
+        // get the storage
+        DiamondStorage storage ds = diamondStorage();
+        // facet address can't be zero address
+        require(_facetAddress != address(0)); // dev: Add facet can't be address(0)
+        // loop through each selector we are removing
+        for (
+            uint256 selectorIndex;
+            selectorIndex < _functionSelectors.length;
+            selectorIndex++
+        ) {
+            // get the current
+            bytes4 selector = _functionSelectors[selectorIndex];
+
+            address facetAddress = ds.selectorToFacetAddress[selector];
+            require(facetAddress != address(0)); // dev: Can't remove function that doesn't exist
+            // can't remove immutable functions -- functions defined directly in the diamond
+            require(facetAddress != address(this)); // dev: Can't remove immutable function
+            // delete the selector
+            bool removeSelector =
+                facetAddressToFunctionSelectors[facetAddress].remove(selector);
+            require(removeSelector); // dev: failed to remove selector
+            // if there are no more selectors for a facet, remove the facet
+            if (
+                ds.facetAddressToFunctionSelectors[facetAddress].length() == 0
+            ) {
+                ds.facets.remove(facetAddress);
+            }
+            delete ds.selectorToFacetAddress[selector];
+        }
+    }
+
     /// @dev Verify a contract has code
     function enforceHasContractCode(address _contract) internal view {
         uint256 contractSize;
