@@ -5,12 +5,18 @@ it will be interacted with through the Diamond contract.
 """
 import pytest
 import brownie
+from brownie import Contract
 from brownie.convert import to_bytes
 
 
 @pytest.fixture(scope="module")
 def mock_contract(adam, MockContract):
     return adam.deploy(MockContract)
+
+
+@pytest.fixture(scope="module")
+def diamondmock(adam, MockContract, diamond):
+    return Contract.from_abi("Mock Diamond", diamond.address, MockContract.abi)
 
 
 def test_diamond_cut_emits_DiamondCut_event(
@@ -57,9 +63,8 @@ def test_retrieve_all_facets_is_updated_with_new_selectors(
     assert set(MockContract.signatures.values()) <= signatures
 
 
-@pytest.mark.skip(reason="Can't properly send calldata for some reason")
 def test_diamond_delegates_call_with_calldata_to_init(
-    adam, zero_address, cut, loupe, mock_contract, MockContract
+    adam, zero_address, cut, loupe, mock_contract, MockContract, diamondmock
 ):
 
     before = mock_contract.getVal()  # this will be 0
@@ -68,7 +73,7 @@ def test_diamond_delegates_call_with_calldata_to_init(
     data = [[mock_contract.address, 0, list(MockContract.signatures.values())]]
     cut.diamondCut(data, mock_contract.address, _calldata, {"from": adam})
 
-    after = mock_contract.getVal()  # this should be 100
+    after = diamondmock.getVal()  # this should be 100
 
     assert before == 0
     assert after == 100
