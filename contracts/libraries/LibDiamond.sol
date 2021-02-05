@@ -134,6 +134,45 @@ library LibDiamond {
         }
     }
 
+    /// @dev Replace a function selector in a diamond
+    function replaceFunctions(
+        address _facetAddress,
+        bytes4[] memory _functionSelectors
+    ) internal {
+        // need functions to add
+        require(_functionSelectors.length > 0); // dev: No selectors in facet to cut
+        // get the storage
+        DiamondStorage storage ds = diamondStorage();
+        // facet address can't be zero address
+        require(_facetAddress != address(0)); // dev: Replace facet can't be address(0)
+
+        enforceHasContractCode(_facetAddress); // dev: Replace facet has no code
+        // loop through each selector
+        for (
+            uint256 selectorIndex;
+            selectorIndex < _functionSelectors.length;
+            selectorIndex++
+        ) {
+            // get the current selector
+            bytes4 selector = _functionSelectors[selectorIndex];
+            address oldFacetAddress = ds.selectorToFacetAddress[selector];
+            // can't replace immutable functions -- functions defined directly in the diamond
+            require(oldFacetAddress != address(this)); // dev: Can't replace immutable function
+            require(oldFacetAddress != _facetAddress); // dev: Can't replace function with same function
+            require(oldFacetAddress != address(0)); // dev: Can't replace function that doesn't exist
+            // replace old facet address
+            ds.selectorToFacetAddress[selector] = _facetAddress;
+            bool removeOld =
+                ds.facetAddressToFunctionSelectors[oldFacetAddress].remove(
+                    selector
+                );
+            require(removeOld); // dev: Failed to remove selector from old facet address
+            bool addNew =
+                ds.facetAddressToFunctionSelectors[_facetAddress].add(selector);
+            require(addNew); // dev: Failed to add selector to new facet address
+        }
+    }
+
     /// @dev Remove a collection of functions from diamond
     function removeFunctions(
         address _facetAddress,
