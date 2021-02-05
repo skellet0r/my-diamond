@@ -137,7 +137,9 @@ library LibDiamond {
             // add the facet address and selector position in selector array for the selector
             ds.selectorToFacetAddress[selector] = _facetAddress;
             bool addSelector =
-                ds.facetAddressToFunctionSelectors[_facetAddress].add(selector);
+                ds.facetAddressToFunctionSelectors[_facetAddress].add(
+                    bytes32(selector)
+                );
             require(addSelector); // dev: selector already present in facet
             ds.facets.add(_facetAddress);
         }
@@ -173,12 +175,20 @@ library LibDiamond {
             ds.selectorToFacetAddress[selector] = _facetAddress;
             bool removeOld =
                 ds.facetAddressToFunctionSelectors[oldFacetAddress].remove(
-                    selector
+                    bytes32(selector)
                 );
             require(removeOld); // dev: Failed to remove selector from old facet address
             bool addNew =
-                ds.facetAddressToFunctionSelectors[_facetAddress].add(selector);
+                ds.facetAddressToFunctionSelectors[_facetAddress].add(
+                    bytes32(selector)
+                );
             require(addNew); // dev: Failed to add selector to new facet address
+            if (
+                ds.facetAddressToFunctionSelectors[oldFacetAddress].length() ==
+                0
+            ) {
+                ds.facets.remove(oldFacetAddress);
+            }
         }
     }
 
@@ -208,7 +218,9 @@ library LibDiamond {
             require(facetAddress != address(this)); // dev: Can't remove immutable function
             // delete the selector
             bool removeSelector =
-                facetAddressToFunctionSelectors[facetAddress].remove(selector);
+                ds.facetAddressToFunctionSelectors[facetAddress].remove(
+                    bytes32(selector)
+                );
             require(removeSelector); // dev: failed to remove selector
             // if there are no more selectors for a facet, remove the facet
             if (
