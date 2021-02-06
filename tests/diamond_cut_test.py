@@ -6,7 +6,6 @@ it will be interacted with through the Diamond contract.
 import pytest
 import brownie
 from brownie import Contract
-from brownie.convert import to_bytes
 
 
 @pytest.fixture(scope="module")
@@ -79,15 +78,13 @@ def test_diamond_delegates_call_with_calldata_to_init(
     assert after == 100
 
 
-@pytest.mark.skip(reason="Can't properly send calldata for some reason")
 def test_no_delegatecall_when_init_is_zero_address_and_no_calldata(
     adam, zero_address, cut, loupe, mock_contract, MockContract, diamondmock
 ):
 
+    _calldata = b""
     data = [[mock_contract.address, 0, list(MockContract.signatures.values())]]
-    _calldata = cut.diamondCut.encode_input(data, zero_address, to_bytes("0x", "bytes"))
-    # cut.diamondCut({"from": adam}, data=_calldata)
-    adam.transfer(cut, 0, data=_calldata)
+    cut.diamondCut(data, zero_address, _calldata, {"from": adam})
 
     after = diamondmock.getVal()  # this should still be 0
 
@@ -104,13 +101,12 @@ def test_diamond_cut_fails_when_given_calldata_but_no_init(
         cut.diamondCut(data, zero_address, _calldata, {"from": adam})
 
 
-@pytest.mark.skip(reason="Can't properly send calldata for some reason")
 def test_diamond_cut_fails_when_given_init_but_no_calldata(
     adam, zero_address, cut, mock_contract, MockContract
 ):
 
-    with brownie.reverts("dev: _calldata is empty but _init is not address(0)"):
+    with brownie.reverts("_calldata is empty but _init is not address(0)"):
         data = [[mock_contract.address, 0, list(MockContract.signatures.values())]]
         cut.diamondCut(
-            data, mock_contract.address, to_bytes(0), {"from": adam},
+            data, mock_contract.address, b"", {"from": adam},
         )
