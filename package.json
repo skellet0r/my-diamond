@@ -26,7 +26,7 @@
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0"
   },
-  "name": "recovery",
+  "name": "erc2535",
   "private": true,
   "scripts": {
     "build": "react-scripts build",

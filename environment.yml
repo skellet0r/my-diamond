@@ -1,4 +1,4 @@
-name: recovery
+name: erc2535
 channels:
   - defaults
   - conda-forge
